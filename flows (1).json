@@ -1,0 +1,317 @@
+[
+    {
+        "id": "5ca39c589d581bbe",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "8f90456d11e6f5b0",
+        "type": "mqtt in",
+        "z": "5ca39c589d581bbe",
+        "name": "",
+        "topic": "forest/heat",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "9ea66c502cd387bd",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 320,
+        "y": 760,
+        "wires": [
+            [
+                "7fe6981f349e60ec"
+            ]
+        ]
+    },
+    {
+        "id": "a9965404f3a5e79a",
+        "type": "mqtt in",
+        "z": "5ca39c589d581bbe",
+        "name": "",
+        "topic": "forest/smoke",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "9ea66c502cd387bd",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 270,
+        "y": 840,
+        "wires": [
+            [
+                "659640bf661f6531"
+            ]
+        ]
+    },
+    {
+        "id": "1eb5c8deb0cb3d28",
+        "type": "mqtt in",
+        "z": "5ca39c589d581bbe",
+        "name": "",
+        "topic": "forest/fire",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "9ea66c502cd387bd",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 280,
+        "y": 920,
+        "wires": [
+            [
+                "07daa7f7c7a8c1d2"
+            ]
+        ]
+    },
+    {
+        "id": "be1ee9f7a4b0218d",
+        "type": "mqtt in",
+        "z": "5ca39c589d581bbe",
+        "name": "",
+        "topic": "forest/humidity",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "9ea66c502cd387bd",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 280,
+        "y": 1000,
+        "wires": [
+            [
+                "95d76f301aadbeb3"
+            ]
+        ]
+    },
+    {
+        "id": "0395d554a0b7358a",
+        "type": "function",
+        "z": "5ca39c589d581bbe",
+        "name": "Alert_board",
+        "func": "let smoke = global.get('smoke');  \nlet heat = global.get('heat');    \nlet fire = global.get('fire');\nlet humidity = global.get('humidity');\n\n//node.warn(`Heat: ${heat}, Smoke: ${smoke}, Fire: ${fire}, Humidity: ${humidity}`);\n\n// Define message objects with topic and payload\nlet msgFireService = { topic: 'alert/fireService', payload: null };\nlet msgHomeOwners = { topic: 'alert/homeOwners', payload: null };\nlet msgNewsOrganizations = { topic: 'alert/newsOrganizations', payload: null };\nlet msgSocialMedia = { topic: 'alert/socialMedia', payload: null };\n\n\nif (heat !== undefined && smoke !== undefined && fire !== undefined && humidity !== undefined) {\n    if (heat > 45 && smoke && fire && humidity < 30) {\n        msgFireService.payload = \"Major Alert: Fire detected! Low humidity increases risk!\";\n        msgHomeOwners.payload = \"Major Alert: Fire detected! Evacuate immediately!\";\n        msgNewsOrganizations.payload = \"Major Alert: Fire detected in the forest area!\";\n        msgSocialMedia.payload = \"Major Alert: Fire detected in the forest! Stay safe!\";\n    } else if (heat > 45 && smoke && humidity < 30) {\n        msgFireService.payload = \"Minor Alert: Potential fire detected with low humidity.\";\n        msgHomeOwners.payload = \"Minor Alert: Stay vigilant for fire risk.\";\n        msgNewsOrganizations.payload = \"Minor Alert: Fire risk detected due to heat and smoke.\";\n        msgSocialMedia.payload = \"Minor Alert: High heat and smoke detected in the forest.\";\n    } else if (heat > 45 && smoke) {\n        msgFireService.payload = \"Minor Alert: High heat and smoke detected.\";\n        msgHomeOwners.payload = \"Minor Alert: High heat and smoke detected, monitor conditions.\";\n    } else if (humidity < 20 && smoke) {\n        msgFireService.payload = \"Warning: Extremely low humidity and smoke detected.\";\n        msgSocialMedia.payload = \"Warning: Extremely low humidity and smoke, fire risk high!\";\n    } else {\n        msgFireService.payload = \"No alert, conditions normal\";\n        msgHomeOwners.payload = \"No alert, conditions normal\";\n        msgNewsOrganizations.payload = \"No alert, conditions normal\";\n        msgSocialMedia.payload = \"No alert, conditions normal\"; }\n} else {\n    return null; // Waiting for all sensor data\n}\n\n// Output the message to the correct alert nodes\nreturn [msgFireService, msgHomeOwners, msgNewsOrganizations, msgSocialMedia];\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 840,
+        "wires": [
+            [
+                "f30916cb9836a5b9",
+                "e000089b588bbe3c",
+                "72b64aa00a2a2e5a",
+                "cd732f38f68ea518",
+                "b1dfae23cb3c7aee"
+            ]
+        ]
+    },
+    {
+        "id": "659640bf661f6531",
+        "type": "function",
+        "z": "5ca39c589d581bbe",
+        "name": "Convert2",
+        "func": "let smoke = msg.payload.value !== undefined ? msg.payload.value : \"No smoke data\";\nglobal.set('smoke', smoke);\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 840,
+        "wires": [
+            [
+                "0395d554a0b7358a"
+            ]
+        ]
+    },
+    {
+        "id": "7fe6981f349e60ec",
+        "type": "function",
+        "z": "5ca39c589d581bbe",
+        "name": "Convert",
+        "func": "let heat = msg.payload.value;\nglobal.set('heat', heat);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 760,
+        "wires": [
+            [
+                "0395d554a0b7358a"
+            ]
+        ]
+    },
+    {
+        "id": "07daa7f7c7a8c1d2",
+        "type": "function",
+        "z": "5ca39c589d581bbe",
+        "name": "Convert3",
+        "func": "let fire = msg.payload.value;\nglobal.set('fire', fire);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 920,
+        "wires": [
+            [
+                "0395d554a0b7358a"
+            ]
+        ]
+    },
+    {
+        "id": "95d76f301aadbeb3",
+        "type": "function",
+        "z": "5ca39c589d581bbe",
+        "name": "Convert4",
+        "func": "let humidity = msg.payload.value;\nglobal.set('humidity', humidity);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 1000,
+        "wires": [
+            [
+                "0395d554a0b7358a"
+            ]
+        ]
+    },
+    {
+        "id": "b1dfae23cb3c7aee",
+        "type": "mqtt out",
+        "z": "5ca39c589d581bbe",
+        "name": "",
+        "topic": "alert/fireService",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "9ea66c502cd387bd",
+        "x": 970,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "cd732f38f68ea518",
+        "type": "mqtt out",
+        "z": "5ca39c589d581bbe",
+        "name": "",
+        "topic": "alert/homeOwners",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "9ea66c502cd387bd",
+        "x": 970,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "72b64aa00a2a2e5a",
+        "type": "mqtt out",
+        "z": "5ca39c589d581bbe",
+        "name": "",
+        "topic": "alert/newsOrganizations",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "9ea66c502cd387bd",
+        "x": 970,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "e000089b588bbe3c",
+        "type": "mqtt out",
+        "z": "5ca39c589d581bbe",
+        "name": "",
+        "topic": "alert/socialMedia",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "9ea66c502cd387bd",
+        "x": 950,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "f30916cb9836a5b9",
+        "type": "debug",
+        "z": "5ca39c589d581bbe",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "9ea66c502cd387bd",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "broker.hivemq.com",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
